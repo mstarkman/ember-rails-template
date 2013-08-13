@@ -33,7 +33,8 @@ def create_ember_controller
     controller_name = ask_with_default("What is the name of the default ember controller?", "ember").underscore
     generate "controller", "#{controller_name} index"
 
-    replace_file_contents("app/views/#{controller_name}/index.html", "<h1>Welcome to Ember!</h1>")
+    replace_file_contents("app/views/#{controller_name}/index.html.erb", "")
+    create_file("app/assets/javascripts/templates/application.hbs", "<h1>Welcome to Ember!</h1>")
 
     gsub_file "config/routes.rb", "get \"#{controller_name}/index\"", ""
     route "root to: '#{controller_name}#index'"
