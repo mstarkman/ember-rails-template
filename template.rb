@@ -17,6 +17,12 @@ def ask_with_default(question, default_value)
   response
 end
 
+def yes_with_default?(question)
+  yes = %w[y yes].include? ask_with_default(question, "y")
+  yield if yes
+  yes
+end
+
 def replace_file_contents(path, new_contents = "")
   remove_file(path)
   create_file(path, new_contents)
@@ -59,8 +65,7 @@ end
 
 def setup
   responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
-  responses[:use_default_controller] = yes?("Would you like to create default ember controller?")
-  if responses[:use_default_controller]
+  responses[:use_default_controller] = yes_with_default?("Would you like to create default ember controller?") do
     responses[:controller_name] = ask_with_default("What is the name of the default ember controller?", "ember").underscore
   end
 end
