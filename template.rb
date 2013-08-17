@@ -1,4 +1,6 @@
 def responses; @responses ||= {}; end
+def after_bundler_blocks; @after_bundler_blocks ||= []; end
+def after_bundler(&block); after_bundler_blocks << block; end
 
 def create_markdown_readme
   remove_file "README.rdoc"
@@ -47,14 +49,15 @@ def create_ember_controller
 end
 
 def bootstrap_ember
-  generate "ember:bootstrap"
-  create_ember_controller
+  after_bundler do
+    generate "ember:bootstrap"
+    create_ember_controller
+  end
 end
 
 def install_ember
   gem 'ember-rails'
   gem 'ember-source', responses[:ember_version]
-  run 'bundle install'
 
   application(nil, env: :development) { ember_variant(:development) }
   application(nil, env: :test) { ember_variant(:production) }
@@ -98,6 +101,14 @@ def setup_template
   end
 end
 
+def bundle_install
+  run 'bundle install'
+
+  after_bundler_blocks.each do |block|
+    block.call
+  end
+end
+
 def run_template
   create_markdown_readme
   install_ember
@@ -105,6 +116,7 @@ def run_template
   install_development_gems
   install_development_and_test_gems
   install_test_gems
+  bundle_install
 end
 
 setup_template

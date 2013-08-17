@@ -13,3 +13,4 @@ Template for creating Rails apps with Ember.js
 * improve readme to include the list of gems and which ones are optional
 * Add powder gem stuff
 * Add application.rb customization stuff
+* Add notifications to the screen to let the user know what's going on
