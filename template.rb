@@ -63,7 +63,35 @@ def install_ember
   bootstrap_ember
 end
 
-def setup
+def install_ui_gems
+  gem 'bootstrap-sass', '~> 2.3.2.1'
+  gem 'font-awesome-rails'
+end
+
+def install_development_gems
+  gem_group :development do
+    gem 'better_errors'
+    gem 'binding_of_caller'
+    gem 'pry-rails'
+    gem 'quiet_assets'
+    gem 'meta_request'
+  end
+end
+
+def install_development_and_test_gems
+  gem_group :development, :test do
+    gem 'rspec-rails', version: '~> 2.0'
+    gem 'factory_girl_rails', version: '~> 4.0'
+  end
+end
+
+def install_test_gems
+  gem_group :test do
+    gem 'shoulda-matchers'
+  end
+end
+
+def setup_template
   responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
   responses[:use_default_controller] = yes_with_default?("Would you like to create default ember controller?") do
     responses[:controller_name] = ask_with_default("What is the name of the default ember controller?", "ember").underscore
@@ -73,7 +101,11 @@ end
 def run_template
   create_markdown_readme
   install_ember
+  install_ui_gems
+  install_development_gems
+  install_development_and_test_gems
+  install_test_gems
 end
 
-setup
+setup_template
 run_template
