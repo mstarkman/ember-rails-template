@@ -25,6 +25,10 @@ def yes_with_default?(question)
   yes
 end
 
+def say_custom(tag, text)
+  say "\033[33m[#{tag}]\033[0m #{text}"
+end
+
 def replace_file_contents(path, new_contents = "")
   remove_file(path)
   create_file(path, new_contents)
@@ -34,9 +38,10 @@ def ember_variant(variant)
   "# ember.js variant\n  config.ember.variant = :#{variant}\n"
 end
 
-def create_ember_controller
-  return unless responses[:use_default_controller]
+def create_root_controller
+  return unless responses[:use_root_controller]
 
+  say_custom "Ember.js", "Creating the root controller..."
   controller_name = responses[:controller_name]
   generate "controller", "#{controller_name} index"
 
@@ -50,12 +55,14 @@ end
 
 def bootstrap_ember
   after_bundler do
+    say_custom "Ember.js", "Bootstrapping..."
     generate "ember:bootstrap"
-    create_ember_controller
+    create_root_controller
   end
 end
 
 def install_ember
+  say_custom "Ember.js", "Installing..."
   gem 'ember-rails'
   gem 'ember-source', responses[:ember_version]
 
@@ -67,11 +74,13 @@ def install_ember
 end
 
 def install_ui_gems
+  say_custom "Gems", "Configuring the UI gems"
   gem 'bootstrap-sass', '~> 2.3.2.1'
   gem 'font-awesome-rails'
 end
 
 def install_development_gems
+  say_custom "Gems", "Configuring the development gems"
   gem_group :development do
     gem 'better_errors'
     gem 'binding_of_caller'
@@ -82,6 +91,7 @@ def install_development_gems
 end
 
 def install_development_and_test_gems
+  say_custom "Gems", "Configuring the development and test gems"
   gem_group :development, :test do
     gem 'rspec-rails', version: '~> 2.0'
     gem 'factory_girl_rails', version: '~> 4.0'
@@ -89,21 +99,25 @@ def install_development_and_test_gems
 end
 
 def install_test_gems
+  say_custom "Gems", "Configuring the test gems"
   gem_group :test do
     gem 'shoulda-matchers'
   end
 end
 
 def setup_template
+  say_custom "Setup", "Gathering information"
   responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
-  responses[:use_default_controller] = yes_with_default?("Would you like to create default ember controller?") do
-    responses[:controller_name] = ask_with_default("What is the name of the default ember controller?", "ember").underscore
+  responses[:use_root_controller] = yes_with_default?("Would you like to create an ember controller as the root route?") do
+    responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
   end
 end
 
 def bundle_install
+  say_custom "Bundler", "Installing..."
   run 'bundle install'
 
+  say_custom "Bundler", "Running the after bundle steps..."
   after_bundler_blocks.each do |block|
     block.call
   end
