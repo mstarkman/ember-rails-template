@@ -75,8 +75,32 @@ end
 
 def install_ui_gems
   say_custom "Gems", "Configuring the UI gems"
-  gem 'bootstrap-sass', '~> 2.3.2.1'
-  gem 'font-awesome-rails'
+  gem 'bootstrap-sass', '~> 2.3.2.1' if responses[:use_bootstrap_sass]
+  gem 'font-awesome-rails' if responses[:use_font_awesome]
+
+  after_bundler do
+    if responses[:use_bootstrap_sass]
+      say_custom "Bootstrap Sass", "Bootstrapping..."
+      remove_file "app/assets/stylesheets/application.css"
+      create_file "app/assets/stylesheets/application.css.scss", "@import \"bootstrap\";\n"
+      inject_into_file "app/assets/javascripts/application.js", after: "//= require jquery_ujs\n" do
+        "//= require bootstrap\n"
+      end
+    end
+
+    if responses[:use_font_awesome]
+      say_custom "Font Awesome", "Bootstrapping..."
+      if responses[:use_bootstrap_sass]
+        inject_into_file "app/assets/stylesheets/application.css.scss", after: "@import \"bootstrap\";\n" do
+          "@import \"font-awesome\";\n"
+        end
+      else
+        inject_into_file "app/assets/stylesheets/application.css", before: " *= require_self\n" do
+          " *= require font-awesome\n"
+        end
+      end
+    end
+  end
 end
 
 def install_development_gems
@@ -158,6 +182,8 @@ def setup_template
   responses[:disable_turbolinks] = yes_with_default?("Would you like to disable turbolinks for this app?")
   responses[:use_rspec] = yes_with_default?("Do you want to use RSpec for testing?")
   responses[:use_factory_girl] = yes_with_default?("Do you want to use Factory Girl?")
+  responses[:use_bootstrap_sass] = yes_with_default?("Do you want to use the bootstrap-sass gem?")
+  responses[:use_font_awesome] = yes_with_default?("Do you want to use Font Awesome?")
 end
 
 def run_template
