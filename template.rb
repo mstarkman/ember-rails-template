@@ -93,8 +93,29 @@ end
 def install_development_and_test_gems
   say_custom "Gems", "Configuring the development and test gems"
   gem_group :development, :test do
-    gem 'rspec-rails', version: '~> 2.0'
-    gem 'factory_girl_rails', version: '~> 4.0'
+    gem 'rspec-rails', version: '~> 2.0' if responses[:use_rspec]
+    gem 'factory_girl_rails', version: '~> 4.0' if responses[:use_factory_girl]
+  end
+
+  after_bundler do
+    if responses[:use_rspec]
+      say_custom "RSpec", "Bootstrapping..."
+      generate "rspec:install" if responses[:use_rspec]
+    end
+
+    if responses[:use_factory_girl]
+      if responses[:use_rspec]
+        say_custom "Factory Girl", "Configuring for RSpec"
+        inject_into_file "spec/spec_helper.rb", after: "RSpec.configure do |config|\n" do
+          "  config.include FactoryGirl::Syntax::Methods\n\n"
+        end
+      else
+        say_custom "Factory Girl", "Configuring for Test::Unit"
+        inject_into_file "test/test_helper.rb", after: "class ActiveSupport::TestCase\n" do
+          "  include FactoryGirl::Syntax::Methods\n\n"
+        end
+      end
+    end
   end
 end
 
@@ -135,6 +156,8 @@ def setup_template
     responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
   end
   responses[:disable_turbolinks] = yes_with_default?("Would you like to disable turbolinks for this app?")
+  responses[:use_rspec] = yes_with_default?("Do you want to use RSpec for testing?")
+  responses[:use_factory_girl] = yes_with_default?("Do you want to use Factory Girl?")
 end
 
 def run_template
