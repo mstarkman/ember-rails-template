@@ -21,7 +21,7 @@ end
 
 def yes_with_default?(question)
   yes = %w[y yes].include? ask_with_default(question, "y")
-  yield if yes
+  yield if block_given? && yes
   yes
 end
 
@@ -105,14 +105,6 @@ def install_test_gems
   end
 end
 
-def setup_template
-  say_custom "Setup", "Gathering information"
-  responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
-  responses[:use_root_controller] = yes_with_default?("Would you like to create an ember controller as the root route?") do
-    responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
-  end
-end
-
 def bundle_install
   say_custom "Bundler", "Installing..."
   run 'bundle install'
@@ -123,6 +115,28 @@ def bundle_install
   end
 end
 
+def disable_turbolinks
+  return unless responses[:disable_turbolinks]
+
+  say_custom "Turbolinks", "Removing from Gemfile"
+  gsub_file "Gemfile", "gem 'turbolinks'", "#gem 'turbolinks'"
+
+  say_custom "Turbolinks", "Removing from app/assets/javascripts/application.js"
+  gsub_file "app/assets/javascripts/application.js", "//= require turbolinks\n", ""
+
+  say_custom "Turbolinks", "Removing from app/views/layouts/application.html.erb"
+  gsub_file "app/views/layouts/application.html.erb", ", \"data-turbolinks-track\" => true", ""
+end
+
+def setup_template
+  say_custom "Setup", "Gathering information"
+  responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
+  responses[:use_root_controller] = yes_with_default?("Would you like to create an ember controller as the root route?") do
+    responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
+  end
+  responses[:disable_turbolinks] = yes_with_default?("Would you like to disable turbolinks for this app?")
+end
+
 def run_template
   create_markdown_readme
   install_ember
@@ -130,6 +144,7 @@ def run_template
   install_development_gems
   install_development_and_test_gems
   install_test_gems
+  disable_turbolinks
   bundle_install
 end
 
