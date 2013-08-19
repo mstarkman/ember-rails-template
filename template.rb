@@ -173,6 +173,28 @@ def disable_turbolinks
   gsub_file "app/views/layouts/application.html.erb", ", \"data-turbolinks-track\" => true", ""
 end
 
+def customize_generators
+  return unless responses[:customize_generators]
+
+  say_custom "Generators", "Customizing..."
+  application do <<-GENERATORS
+config.generators do |g|
+      g.javascripts false
+      g.stylesheets false
+      g.helper false
+      g.test_framework :#{responses[:use_rspec] ? "rspec" : "test_unit"},
+                       :fixtures => true,
+                       :view_specs => false,
+                       :helper_specs => false,
+                       :routing_specs => false,
+                       :controller_specs => true,
+                       :request_specs => false
+      #{responses[:use_factory_girl] ? "g.fixture_replacement :factory_girl, :dir => \"#{responses[:use_rspec] ? "spec" : "test"}/factories\"" : ""}
+    end
+  GENERATORS
+  end
+end
+
 def setup_template
   say_custom "Setup", "Gathering information"
   responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
@@ -184,6 +206,7 @@ def setup_template
   responses[:use_factory_girl] = yes_with_default?("Do you want to use Factory Girl?")
   responses[:use_bootstrap_sass] = yes_with_default?("Do you want to use the bootstrap-sass gem?")
   responses[:use_font_awesome] = yes_with_default?("Do you want to use Font Awesome?")
+  responses[:customize_generators] = yes_with_default?("Do you want to customize the standard Rails generators?")
 end
 
 def run_template
@@ -194,6 +217,7 @@ def run_template
   install_development_and_test_gems
   install_test_gems
   disable_turbolinks
+  customize_generators
   bundle_install
 end
 
