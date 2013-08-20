@@ -51,6 +51,10 @@ This is a list of gems that are installed in the development and test groups wit
 
 You will be prompted to disable the [turbolinks]() gem within your app.
 
+## Rails generators customizations
+
+This code snippet will be added to your `config/application.rb` file.  Some of the items may be a little different depending on the options you choose.
+
 ```ruby
 config.generators do |g|
   g.javascripts false
@@ -84,4 +88,4 @@ end
 
 ## License
 
-See [LICENSE.txt](LICENSE.txt).
+See [LICENSE](LICENSE).
