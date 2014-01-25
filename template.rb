@@ -64,7 +64,7 @@ end
 def install_ember
   say_custom "Ember.js", "Installing..."
   gem 'ember-rails'
-  gem 'ember-source', responses[:ember_version]
+  gem 'ember-source', "~> #{responses[:ember_version]}"
 
   application(nil, env: :development) { ember_variant(:development) }
   application(nil, env: :test) { ember_variant(:production) }
