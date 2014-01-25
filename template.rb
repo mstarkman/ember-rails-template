@@ -75,7 +75,7 @@ end
 
 def install_ui_gems
   say_custom "Gems", "Configuring the UI gems"
-  gem 'bootstrap-sass', '~> 2.3.2.1' if responses[:use_bootstrap_sass]
+  gem 'bootstrap-sass', '~> 3.0' if responses[:use_bootstrap_sass]
   gem 'font-awesome-rails' if responses[:use_font_awesome]
 
   after_bundler do
