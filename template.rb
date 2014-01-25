@@ -56,7 +56,7 @@ end
 def bootstrap_ember
   after_bundler do
     say_custom "Ember.js", "Bootstrapping..."
-    generate "ember:bootstrap"
+    generate "ember:bootstrap --javascript-engine #{responses[:ember_javascript_engine]}"
     create_root_controller
   end
 end
@@ -69,6 +69,10 @@ def install_ember
   application(nil, env: :development) { ember_variant(:development) }
   application(nil, env: :test) { ember_variant(:production) }
   application(nil, env: :production) { ember_variant(:production) }
+
+  if responses[:use_ember_data]
+    gem 'ember-data-source', "~> #{responses[:ember_data_version]}"
+  end
 
   bootstrap_ember
 end
@@ -198,6 +202,10 @@ end
 def setup_template
   say_custom "Setup", "Gathering information"
   responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.3.1")
+  responses[:use_ember_data] = yes_with_default?("Would you like to use ember-data?") do
+    responses[:ember_data_version] = ask_with_default("What version of ember data would you like?", "1.0.0.beta.5")
+  end
+  responses[:ember_javascript_engine] = ask_with_default("Which JavaScript engine do you want to use with ember.js (js or coffee)?", "js")
   responses[:use_root_controller] = yes_with_default?("Would you like to create an ember controller as the root route?") do
     responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
   end
