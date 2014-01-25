@@ -197,7 +197,7 @@ end
 
 def setup_template
   say_custom "Setup", "Gathering information"
-  responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.0.0.rc6.4")
+  responses[:ember_version] = ask_with_default("What version of ember.js would you like?", "1.3.1")
   responses[:use_root_controller] = yes_with_default?("Would you like to create an ember controller as the root route?") do
     responses[:controller_name] = ask_with_default("What is the name of the ember root controller?", "ember").underscore
   end
